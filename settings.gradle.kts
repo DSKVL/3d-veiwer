@@ -1,2 +1,2 @@
-rootProject.name = "rotation-bodies"
+rootProject.name = "3d-viewer"
 

@@ -1,6 +1,5 @@
 package ru.nsu.fit.dskvl.gfx.models;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -11,26 +10,16 @@ public class RotationBody {
     private Spline frame;
 
     public int getM1() { return M1; }
-    public void setM1(int m1) {
-        M1 = m1;
-    }
-    public int getM2() {
-        return M2 + 1;
-    }
-    public void setM2(int m2) {
-        M2 = m2 - 1;
-    }
+    public void setM1(int m1) { M1 = m1; }
+		//TODO why??????
+    public int getM2() { return M2 + 1; }
+    public void setM2(int m2) { M2 = m2 - 1; }
     public int getCirclesAccuracy() { return circlesAccuracy; }
-    public void setCirclesAccuracy(int circlesAccuracy) { this.circlesAccuracy = circlesAccuracy; }
-
-
-    public Spline getFrame() {
-        return frame;
-    }
-
-    public RotationBody(Spline frame) {
-        this.frame = frame;
-    }
+    public void setCirclesAccuracy(int circlesAccuracy) { 
+			this.circlesAccuracy = circlesAccuracy; 
+		}
+    public Spline getFrame() { return frame; }
+    public RotationBody(Spline frame) { this.frame = frame; }
 
     public class CircleIterator implements Iterator<Line3D> {
 
@@ -59,29 +48,25 @@ public class RotationBody {
         }
     }
 
-    public class CirclesIterator implements Iterator<CircleIterator> {
+    public Iterator<CircleIterator> circlesIterator() { 
+			return new Iterator<CircleIterator>() {
         private int currentM = 0;
-        private final ArrayList<Point2D> splinePoints;
-        CirclesIterator() {
-            splinePoints = frame.getSplinePoints();
-        }
+        private final ArrayList<Vec4> splinePoints = frame.getSplinePoints();
 
         @Override
-        public boolean hasNext() {
-            return currentM <= M2;
-        }
+        public boolean hasNext() { return currentM <= M2; }
 
         @Override
         public CircleIterator next() {
-            var point = new Vec4(splinePoints.get((int) ((double) currentM/(M2)*(splinePoints.size()-1))));
+            var point = splinePoints.get(
+								(int) ((double) currentM/(M2)*(splinePoints.size()-1))
+						);
             currentM++;
             return new CircleIterator(circlesAccuracy, point, Vec4.xAxis);
         }
-    }
-
-    public CirclesIterator circlesIterator() {
-        return new CirclesIterator();
-    }
+			
+			};
+		}
 
     public class OutlineIterator implements Iterator<Line3D> {
         private final Operator rotate;
@@ -102,21 +87,18 @@ public class RotationBody {
         }
     }
 
-    public class OutlinesIterator implements Iterator<OutlineIterator> {
-        private int currentM = 0;
+    public Iterator<OutlineIterator> outlinesIterator() {
+        return new Iterator<OutlineIterator>() {
+        		private int currentM = 0;
 
-        @Override
-        public boolean hasNext() {
-            return currentM <= M1;
-        }
+        		@Override
+        		public boolean hasNext() { return currentM <= M1; }
 
-        @Override
-        public OutlineIterator next() {
-            return new OutlineIterator(Vec4.xAxis, ((double) currentM++ /M1)*2*Math.PI);
-        }
-    }
-
-    public OutlinesIterator outlinesIterator() {
-        return new OutlinesIterator();
+        		@Override
+        		public OutlineIterator next() {
+            		return new OutlineIterator(Vec4.xAxis, 
+										((double) currentM++ /M1)*2*Math.PI);
+        		}
+				};
     }
 }

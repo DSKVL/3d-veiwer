@@ -25,9 +25,4 @@ public class Point2D {
         this.y += other.y;
         return this;
     }
-
-    public Point2D apply(Operator operator) {
-        //todo
-        return this;
-    }
 }

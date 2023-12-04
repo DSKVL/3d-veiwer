@@ -1,12 +1,25 @@
 package ru.nsu.fit.dskvl.gfx.views;
 
-import com.formdev.flatlaf.FlatLightLaf;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.io.Serial;
 import java.security.InvalidParameterException;
+
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.MenuElement;
+
+import com.formdev.flatlaf.FlatLightLaf;
 
 public class MainFrame extends JFrame {
     @Serial
@@ -208,12 +221,6 @@ public class MainFrame extends JFrame {
         toolBar.add(createToolBarButton(menuPath));
     }
 
-    //	public JButton addToolBarButton(String menuPath, ButtonGroup gr)
-//	{
-//		var button = createToolBarButton(menuPath, gr);
-//		toolBar.add(button);
-//		return button;
-//	}
     public JToggleButton addToolBarToggleButton(String menuPath) {
         var button = createToolBarToggleButton(menuPath);
         toolBar.add(button);
