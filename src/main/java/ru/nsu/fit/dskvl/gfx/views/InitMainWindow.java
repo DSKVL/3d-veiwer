@@ -1,18 +1,18 @@
 package ru.nsu.fit.dskvl.gfx.views;
 
 
-import ru.nsu.fit.dskvl.gfx.models.Point2D;
-import ru.nsu.fit.dskvl.gfx.models.RotationBody;
-import ru.nsu.fit.dskvl.gfx.models.Spline;
-
+import static javax.swing.JFileChooser.APPROVE_OPTION;
 import java.awt.event.KeyEvent;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Scanner;
-import javax.swing.*;
-
-import static javax.swing.JFileChooser.APPROVE_OPTION;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import ru.nsu.fit.dskvl.gfx.models.RotationBody;
+import ru.nsu.fit.dskvl.gfx.models.Spline;
+import ru.nsu.fit.dskvl.gfx.models.Vec4;
 
 public class InitMainWindow extends MainFrame {
     private static final int minimalWidth = 640;
@@ -29,10 +29,10 @@ public class InitMainWindow extends MainFrame {
             addSubMenu("Help", KeyEvent.VK_H);
             addMenuItem("File/Open", "Open a file", KeyEvent.VK_O, this::openFile);
             addMenuItem("File/Save", "Save a file", KeyEvent.CTRL_DOWN_MASK | KeyEvent.VK_S, this::saveFile);
-            addMenuItem("File/Exit", "Exit application", KeyEvent.VK_X, "Exit.gif", this::onExit);
+            addMenuItem("File/Exit", "Exit application", KeyEvent.VK_X, "/Exit.gif", this::onExit);
             addMenuItem("File/Init", "Init position", KeyEvent.VK_X, null, () -> {});
 
-            addMenuItem("Help/About...", "Shows program version and copyright information", KeyEvent.VK_A, "About.gif", this::onAbout);
+            addMenuItem("Help/About...", "Shows program version and copyright information", KeyEvent.VK_A, "/About.gif", this::onAbout);
 
             setLocationRelativeTo(null);
 
@@ -51,7 +51,8 @@ public class InitMainWindow extends MainFrame {
             pack();
         }
         catch(Exception e) {
-            throw new RuntimeException(e);
+						System.out.println(e);
+          	throw new RuntimeException(e);
         }
     }
 
@@ -68,7 +69,7 @@ public class InitMainWindow extends MainFrame {
                 while(sc.hasNextDouble()) {
                     var x = sc.nextDouble();
                     var y = sc.nextDouble();
-                    frameEditor.addPoint(new Point2D(x, y));
+                    frameEditor.addPoint(new Vec4(x, y));
                 }
                 frameEditor.setNSpinner(spline.size());
                 repaint();
@@ -90,9 +91,9 @@ public class InitMainWindow extends MainFrame {
                 var spline = bodyViewer.getBody().getFrame().getControlPoints();
 
                 for (var point : spline) {
-                    wr.write(((Double) point.x).toString());
+                    wr.write(((Double) point.x()).toString());
                     wr.write(' ');
-                    wr.write(((Double) point.y).toString());
+                    wr.write(((Double) point.y()).toString());
                     wr.write(' ');
                 }
             } catch (IOException e) {
@@ -101,11 +102,13 @@ public class InitMainWindow extends MainFrame {
         });
     }
 
-    public void onAbout() { JOptionPane.showMessageDialog(this,
-            "Притворимся, что тут что-то полезное. Копирайт Денис Коваль 20202.", "About Init", JOptionPane.INFORMATION_MESSAGE); }
-    public void onExit()
-    {
-        System.exit(0);
-    }
+    public void onAbout() { 
+			JOptionPane.showMessageDialog(
+					this,
+        	"Притворимся, что тут что-то полезное. Копирайт Денис Коваль 20202.", 
+					"About Init", 
+					JOptionPane.INFORMATION_MESSAGE); 
+		}
+    public void onExit() { System.exit(0); }
     public static void main(String[] args)  { new InitMainWindow(); }
 }

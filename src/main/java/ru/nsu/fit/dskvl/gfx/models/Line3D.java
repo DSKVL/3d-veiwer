@@ -7,15 +7,8 @@ public class Line3D {
         this.end = end;
     }
 
-    public Line3D(Line2D line2D) {
-        begin = new Vec4(line2D.begin);
-        end = new Vec4(line2D.end);
-    }
-
-    public Line3D(Line3D line3D) {
-        begin = line3D.begin;
-        end = line3D.end;
-    }
+    public Line3D(Line2D line2D) { this(line2D.begin, line2D.end); }
+    public Line3D(Line3D line3D) { this(line3D.begin, line3D.end); }
 
     public Line3D apply(Operator operator) {
         begin = begin.apply(operator);

@@ -1,11 +1,16 @@
 package ru.nsu.fit.dskvl.gfx.views;
 
-import ru.nsu.fit.dskvl.gfx.models.Point2D;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import ru.nsu.fit.dskvl.gfx.models.RotationBody;
 import ru.nsu.fit.dskvl.gfx.models.Spline;
-
-import javax.swing.*;
-import java.awt.*;
+import ru.nsu.fit.dskvl.gfx.models.Vec4;
 
 public class FrameEditor extends JFrame {
     private final OutlineEditor panel;
@@ -30,19 +35,22 @@ public class FrameEditor extends JFrame {
                 insets, 7, 7));
 
         for (int i = 0; i < 8; i++)
-            addPoint(new Point2D(i * ((double) 1 / 8) - 0.5 + 0.5/(8), 0.2));
+            addPoint(new Vec4(i * ((double) 1 / 8) - 0.5 + 0.5/(8), 0.2));
 
         spinnerN = setupParameterSpinner("N", 0, 1,
                 new SpinnerNumberModel(spline.getControlPoints().size(), 5, 64, 1));
         panel.setActivePoint(0);
         var currentPoint = panel.getActivePoint();
         var spinnerX = setupParameterSpinner("X", 1, 1,
-                new SpinnerNumberModel(currentPoint.getModelCoordinates().x, -6.0, 6.0, 0.05));
+                new SpinnerNumberModel(currentPoint.getModelCoordinates().x(), 
+									-20.0, 20.0, 0.05));
 
         var spinnerY = setupParameterSpinner("Y", 1, 2,
-                new SpinnerNumberModel(currentPoint.getModelCoordinates().y, -2.0, 2.0, 0.05));
+                new SpinnerNumberModel(currentPoint.getModelCoordinates().y(), 
+									-2.0, 2.0, 0.05));
         spinnerPoint = setupParameterSpinner("Point", 0, 2,
-                new SpinnerNumberModel(currentPoint.getIndex(), 0, (int) spinnerN.getModel().getValue() - 1, 1));
+                new SpinnerNumberModel(currentPoint.getIndex(), 
+									0, (int) spinnerN.getModel().getValue() - 1, 1));
         var spinnerA0 = setupParameterSpinner("A0", 3, 1,
                 new SpinnerNumberModel(spline.getN(), 1, 500, 1));
         var spinnerM1 = setupParameterSpinner("M1", 4, 1,
@@ -71,7 +79,7 @@ public class FrameEditor extends JFrame {
                 }
             } else {
                 for (int i = totalPointsOld ; i < totalPointsNew; i++) {
-                    addPoint(new Point2D(0, 0));
+                    addPoint(new Vec4(0, 0));
                 }
             }
             spline.recalculate();
@@ -81,14 +89,27 @@ public class FrameEditor extends JFrame {
         });
 
         spinnerX.addChangeListener(e -> {
-            panel.getActivePoint().getModelCoordinates().x = (double) spinnerX.getValue();
+						var activePoint = panel.getActivePoint();
+            var activePointIndex = activePoint.getIndex();
+						var newCoords = new Vec4(
+									(double) spinnerX.getValue(), 
+									activePoint.getModelCoordinates().y()
+								);
+						activePoint.setModelCoordinates(newCoords);	
+						spline.getControlPoints().set(activePointIndex, newCoords);
             spline.recalculate();
             panel.repaint();
             bodyViewer.repaint();
         });
 
         spinnerY.addChangeListener(e -> {
-            panel.getActivePoint().getModelCoordinates().y = (double) spinnerY.getValue();
+						var activePoint = panel.getActivePoint();
+            var activePointIndex = activePoint.getIndex();
+						var newCoords = new Vec4(
+									activePoint.getModelCoordinates().x(),
+									(double) spinnerY.getValue()
+								);
+						spline.getControlPoints().set(activePointIndex, newCoords);
             spline.recalculate();
             panel.repaint();
             bodyViewer.repaint();
@@ -97,15 +118,15 @@ public class FrameEditor extends JFrame {
         spinnerPoint.addChangeListener( e -> {
             panel.setActivePoint((int) spinnerPoint.getValue());
             var point = panel.getActivePoint().getModelCoordinates();
-            spinnerX.setValue(point.x);
-            spinnerY.setValue(point.y);
+            spinnerX.setValue(point.x());
+            spinnerY.setValue(point.y());
             panel.repaint();
         });
 
         coordinatesListener.setAction((point) -> {
             var model = point.getModelCoordinates();
-            spinnerX.setValue(model.x);
-            spinnerY.setValue(model.y);
+            spinnerX.setValue(model.x());
+            spinnerY.setValue(model.y());
             spinnerPoint.setValue(point.getIndex());
             bodyViewer.repaint();
             panel.repaint();
@@ -147,7 +168,7 @@ public class FrameEditor extends JFrame {
         model.setMaximum(N-1);
     }
 
-    public void addPoint(Point2D point) {
+    public void addPoint(Vec4 point) {
         spline.getControlPoints().add(point);
         panel.addPoint(point);
         spline.recalculate();

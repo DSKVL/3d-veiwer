@@ -1,16 +1,18 @@
 package ru.nsu.fit.dskvl.gfx.views;
 
-import ru.nsu.fit.dskvl.gfx.models.Point2D;
-import ru.nsu.fit.dskvl.gfx.models.Spline;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import javax.swing.JComponent;
+import ru.nsu.fit.dskvl.gfx.models.Spline;
+import ru.nsu.fit.dskvl.gfx.models.Vec4;
 
 public class OutlineEditor extends JComponent {
-    private final Spline shapeOutline;
     private final ArrayList<OutlineEditorPoint> editorPoints = new ArrayList<>();
     private OutlineEditorPoint activePoint;
     private double scale = 6;
@@ -18,22 +20,17 @@ public class OutlineEditor extends JComponent {
     private final MouseAdapter mouseHandler;
     private final Spline spline;
 
-    public double getScale() {
-        return scale;
-    }
-
-    public double getAspectRatio() {
-        return aspectRatio;
-    }
+    public double getScale() { return scale; }
+    public double getAspectRatio() { return aspectRatio; }
 
     double aspectRatio = 1.0;
 
     OutlineEditor(Spline spline, CoordinatesListener listener) {
         setLayout(null);
-        shapeOutline = spline;
         this.listener = listener;
         this.spline = spline;
-        var editor = this;
+       	
+				var editor = this;
         mouseHandler = new MouseAdapter() {
             boolean drag = false;
 
@@ -59,11 +56,13 @@ public class OutlineEditor extends JComponent {
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (!drag) return;
-
-                var modelCoordinates =  activePoint.getModelCoordinates();
-                modelCoordinates.x = ((double) e.getX() /editor.getWidth() - 0.5)*scale;
-                modelCoordinates.y = ((double) e.getY() /editor.getHeight() - 0.5)*aspectRatio*scale ;
-                listener.updateActivePointPosition(activePoint);
+								var newCoords = new Vec4(
+										((double) e.getX() /editor.getWidth() - 0.5)*scale,
+                		((double) e.getY() /editor.getHeight() - 0.5)*aspectRatio*scale 
+								);
+                spline.getControlPoints().set(activePoint.getIndex(), newCoords);
+								activePoint.setModelCoordinates(newCoords);	
+								listener.updateActivePointPosition(activePoint);
             }
         };
 
@@ -71,8 +70,9 @@ public class OutlineEditor extends JComponent {
         addMouseListener(mouseHandler);
     }
 
-    public void addPoint(Point2D point) {
-        var editorPoint = new OutlineEditorPoint(point, this, listener, spline, spline.getControlPoints().size()-1);
+    public void addPoint(Vec4 point) {
+        var editorPoint = new OutlineEditorPoint(point, this, listener, spline,
+						spline.getControlPoints().size()-1);
         editorPoint.setVisible(true);
         editorPoints.add(editorPoint);
         add(editorPoint);
@@ -118,25 +118,12 @@ public class OutlineEditor extends JComponent {
             var begin = line.begin;
             var end = line.end;
             g2.drawLine(
-                    (int) ((begin.x /scale + 0.5)*width),
-                    (int) ((begin.y /(scale*aspectRatio) + 0.5)*height),
-                    (int) ((end.x   /scale   + 0.5)*width),
-                    (int) ((end.y   /(scale*aspectRatio)   + 0.5)*height)
+                    (int) ((begin.x() /scale + 0.5)*width),
+                    (int) ((begin.y() /(scale*aspectRatio) + 0.5)*height),
+                    (int) ((end.x()   /scale   + 0.5)*width),
+                    (int) ((end.y()   /(scale*aspectRatio)   + 0.5)*height)
             );
         }
-//        var splinePoints = shapeOutline.getSplinePoints();
-//        var end = splinePoints.get(0);
-//        for (int i = 1; i < splinePoints.size(); i++) {
-//            var begin = end;
-//            end = splinePoints.get(i);
-//
-//            g2.drawLine(
-//                    (int) ((begin.x /scale + 0.5)*width),
-//                    (int) ((begin.y /(scale*aspectRatio) + 0.5)*height),
-//                    (int) ((end.x   /scale   + 0.5)*width),
-//                    (int) ((end.y   /(scale*aspectRatio)   + 0.5)*height)
-//            );
-//        }
     }
 
     public void setActivePoint(int index) {

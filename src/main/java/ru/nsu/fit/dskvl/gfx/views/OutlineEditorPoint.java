@@ -1,20 +1,24 @@
 package ru.nsu.fit.dskvl.gfx.views;
 
-import ru.nsu.fit.dskvl.gfx.models.Point2D;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import javax.swing.JComponent;
 import ru.nsu.fit.dskvl.gfx.models.Spline;
-
-import javax.swing.*;
-
-import java.awt.*;
+import ru.nsu.fit.dskvl.gfx.models.Vec4;
 
 public class OutlineEditorPoint extends JComponent {
-    private final Point2D modelCoordinates;
+    private Vec4 modelCoordinates;
     private final OutlineEditor parent;
     private final double relativeDiameter = 0.03;
     private boolean isActive = false;
     private final int index;
 
-    public OutlineEditorPoint(Point2D coordinates, OutlineEditor parent, CoordinatesListener listener, Spline spline, int index) {
+    public OutlineEditorPoint(Vec4 coordinates, OutlineEditor parent, 
+				CoordinatesListener listener, Spline spline, int index) {
         this.modelCoordinates = coordinates;
         this.parent = parent;
         this.index = index;
@@ -24,19 +28,31 @@ public class OutlineEditorPoint extends JComponent {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         var g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+						RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(isActive ? Color.YELLOW : Color.WHITE);
         g2.setStroke(new BasicStroke(1));
         g2.fillOval(1, 1, getWidth()-2, getHeight()-2);
     }
 
     @Override public int getX() {
-        return (int) (((modelCoordinates.x/parent.getScale()) + 0.5)*parent.getWidth() - getWidth()/2);
+        return (int) (
+						modelCoordinates.x()/parent.getScale()*parent.getWidth() 
+						 + parent.getWidth()/2 
+						 - getWidth()/2
+				);
     }
     @Override public int getY() {
-        return (int) ((0.5 + modelCoordinates.y/(parent.getScale()*parent.getAspectRatio()))*parent.getHeight() - getHeight()/(2));
+				var p = parent;
+        return (int) (
+						modelCoordinates.y()/p.getScale()*p.getAspectRatio()*p.getHeight() 
+						+ parent.getHeight()/2
+						- getHeight()/2
+				);
     }
-    @Override public int getWidth() { return (int) (relativeDiameter*parent.getWidth()); }
+    @Override public int getWidth() { 
+				return (int) (relativeDiameter*parent.getWidth()); 
+		}
     @Override public int getHeight() {
         return (int) (relativeDiameter*parent.getWidth());
     }
@@ -49,8 +65,9 @@ public class OutlineEditorPoint extends JComponent {
     @Override public Dimension getMaximumSize() {
         return getPreferredSize();
     }
-    public void     setActive(boolean status)           { this.isActive = status; }
-    public boolean  isActive()                          { return isActive; }
-    public Point2D  getModelCoordinates()               { return modelCoordinates; }
-    public int      getIndex()                          { return index; }
+    public void     setActive(boolean status) 		{ this.isActive = status; }
+    public boolean  isActive()                		{ return isActive; }
+    public Vec4  		getModelCoordinates()     	 	{ return modelCoordinates; }
+    public void     setModelCoordinates(Vec4 val) { modelCoordinates = val; }
+    public int      getIndex()                		{ return index; }
 }
